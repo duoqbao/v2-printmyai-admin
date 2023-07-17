@@ -4,8 +4,14 @@ export default {
   getList: () => {
     return api.get("/category-styles");
   },
+  sort: (previous) => {
+    return api.post("/category-styles/sort", { previous });
+  },
   create: (body) => {
     return api.post("/category-styles", body);
+  },
+  deletCategoryById: (id) => {
+    return api.delete(`/category-styles/${id}`);
   },
   updateCategoryById: (id, body) => {
     return api.put(`/category-styles/${id}`, body);

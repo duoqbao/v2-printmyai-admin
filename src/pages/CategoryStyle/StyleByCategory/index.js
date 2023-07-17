@@ -49,15 +49,28 @@ export default function StyleByCategory() {
 
   return (
     <div>
-      <Row justify="space-between" align={"middle"}>
-        <Typography.Text strong> {category.name}</Typography.Text>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setOpen(true)}
-        >
-          Add
-        </Button>
+      <Row
+        justify="space-between"
+        align={"middle"}
+        style={{ background: "#fff", padding: 10, borderRadius: 5 }}
+      >
+        <Typography.Title strong level={4}>
+          {" "}
+          {category.name}
+        </Typography.Title>
+        <Row align={"middle"}>
+          <Typography.Text style={{ padding: "0px 10px" }}>
+            Current
+            <Typography.Text strong> {data.length}</Typography.Text> styles
+          </Typography.Text>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setOpen(true)}
+          >
+            Add
+          </Button>
+        </Row>
       </Row>
       <div
         style={{
@@ -140,8 +153,16 @@ const AddModal = ({ open, onClose }) => {
       closable
       maskClosable={false}
     >
-      <Row justify={"end"} align="middle">
+      <Row justify={""} align="middle">
         <Row align={"middle"}>
+          <Typography.Text strong>Name</Typography.Text>
+          <Input
+            placeholder="Input style's name"
+            onChange={(e) => setState({ ...state, name: e.target.value })}
+            value={state.name}
+          />
+        </Row>
+        <Row align={"middle"} style={{ padding: `0px 50px` }}>
           <Typography.Text strong style={{ padding: `0px 5px` }}>
             Premium{" "}
           </Typography.Text>
@@ -156,7 +177,7 @@ const AddModal = ({ open, onClose }) => {
             Credit{" "}
           </Typography.Text>
           <Input
-            style={{ maxWidth: 50 }}
+            style={{ maxWidth: 70, textAlign: "center" }}
             value={state.credit}
             type={"number"}
             min={0}
@@ -164,15 +185,6 @@ const AddModal = ({ open, onClose }) => {
           />
         </Row>
       </Row>
-
-      <Col style={{ marginTop: "10px" }}>
-        <Typography.Text strong>Name</Typography.Text>
-        <Input
-          placeholder="Input style's name"
-          onChange={(e) => setState({ ...state, name: e.target.value })}
-          value={state.name}
-        />
-      </Col>
 
       {/* ? */}
       <Col style={{ marginTop: "10px" }}>
@@ -192,6 +204,16 @@ const AddModal = ({ open, onClose }) => {
           value={state.malePrompt}
         />
       </Col>
+
+      <Col style={{ marginTop: "10px" }}>
+        <Typography.Text strong>Negative prompt</Typography.Text>
+        <Input
+          placeholder="Input female prompt text"
+          onChange={(e) => setState({ ...state, negative: e.target.value })}
+          value={state.negative}
+        />
+      </Col>
+
       {/*  */}
       <Row align={"middle"} style={{ marginTop: "10px" }}>
         <Col style={{ margin: "10px" }}>
@@ -221,10 +243,6 @@ const AddModal = ({ open, onClose }) => {
             />
           </div>
         </Col>
-      </Row>
-
-      {/*  */}
-      <Row align={"middle"} style={{ marginTop: "10px" }}>
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Sampler</Typography.Text>
           <div>
@@ -253,6 +271,8 @@ const AddModal = ({ open, onClose }) => {
           </div>
         </Col>
       </Row>
+
+      {/*  */}
       {/*  */}
       <Row align={"middle"}>
         <Col style={{ margin: "10px" }}>
@@ -291,13 +311,6 @@ const AddModal = ({ open, onClose }) => {
             />
           </div>
         </Col>
-      </Row>
-      {/*
-       */}
-      <Row align={"middle"}>
-        <Col style={{ margin: "10px" }}>
-          <div style={{ width: 42 }}></div>
-        </Col>
 
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Hi-res step </Typography.Text>
@@ -330,6 +343,9 @@ const AddModal = ({ open, onClose }) => {
           </div>
         </Col>
       </Row>
+      {/*
+       */}
+
       {/*  */}
 
       <Row align={"middle"}>
@@ -374,10 +390,7 @@ const AddModal = ({ open, onClose }) => {
             />
           </div>
         </Col>
-      </Row>
-      {/*  */}
 
-      <Row align={"middle"}>
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Config scale </Typography.Text>
           <div>
@@ -406,6 +419,7 @@ const AddModal = ({ open, onClose }) => {
           </div>
         </Col>
       </Row>
+      {/*  */}
 
       <Col style={{ margin: "10px" }}>
         <Typography.Text strong>Female images</Typography.Text>
@@ -544,16 +558,31 @@ const Style = ({
 }) => {
   const [edit, setEdit] = useState(false);
   return (
-    <>
-      <Col align="center" style={{ width: 200, margin: "0px 20px" }}>
-        <Typography.Text strong style={{ textAlign: "center" }}>
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: 20,
+        paddingTop: 0,
+        margin: 10,
+        borderRadius: 10,
+      }}
+    >
+      <Col
+        align="center"
+        style={{ width: 200, margin: "0px 20px", height: 300 }}
+      >
+        <Typography.Title level={3} strong style={{ textAlign: "center" }}>
           {name}
-        </Typography.Text>
+        </Typography.Title>
         <div>
           {premium ? (
             <Typography.Text
               strong
-              style={{ background: "#c79306", padding: "0px 20px" }}
+              style={{
+                background: "#c79306",
+                padding: "0px 20px",
+                borderRadius: 5,
+              }}
             >
               PREMIUM
             </Typography.Text>
@@ -585,7 +614,7 @@ const Style = ({
         }}
         data={item}
       />
-    </>
+    </div>
   );
 };
 
@@ -621,8 +650,16 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
       maskClosable={false}
     >
       <>
-        <Row justify={"end"} align="middle">
-          <Row align={"middle"}>
+        <Row justify={"flex-start"} align="middle">
+          <Row>
+            <Typography.Text strong>Name</Typography.Text>
+            <Input
+              placeholder="Input style's name"
+              onChange={(e) => setState({ ...state, name: e.target.value })}
+              value={state.name}
+            />
+          </Row>
+          <Row align={"middle"} style={{ margin: "0px 50px" }}>
             <Typography.Text strong style={{ padding: `0px 5px` }}>
               Premium{" "}
             </Typography.Text>
@@ -632,12 +669,12 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             />
           </Row>
 
-          <Row align={"middle"} style={{ margin: `0px 20px` }}>
+          <Row align={"middle"} style={{ margin: `0px 50px` }}>
             <Typography.Text strong style={{ padding: `0px 5px` }}>
               Credit{" "}
             </Typography.Text>
             <Input
-              style={{ maxWidth: 50 }}
+              style={{ maxWidth: 70, textAlign: "center" }}
               value={state.credit}
               type={"number"}
               min={0}
@@ -645,14 +682,6 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             />
           </Row>
         </Row>
-        <Col style={{ marginTop: "10px" }}>
-          <Typography.Text strong>Name</Typography.Text>
-          <Input
-            placeholder="Input style's name"
-            onChange={(e) => setState({ ...state, name: e.target.value })}
-            value={state.name}
-          />
-        </Col>
 
         {/* ? */}
         <Col style={{ marginTop: "10px" }}>
@@ -674,6 +703,16 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             value={state.malePrompt}
           />
         </Col>
+        {/*  */}
+        <Col style={{ marginTop: "10px" }}>
+          <Typography.Text strong>Negative prompt</Typography.Text>
+          <Input
+            placeholder="Input female prompt text"
+            onChange={(e) => setState({ ...state, negative: e.target.value })}
+            value={state.negative}
+          />
+        </Col>
+
         {/*  */}
         <Row align={"middle"} style={{ marginTop: "10px" }}>
           <Col style={{ margin: "10px" }}>
@@ -705,10 +744,6 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
               />
             </div>
           </Col>
-        </Row>
-
-        {/*  */}
-        <Row align={"middle"} style={{ marginTop: "10px" }}>
           <Col style={{ margin: "10px" }}>
             <Typography.Text strong>Sampler</Typography.Text>
             <div>
@@ -737,6 +772,9 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             </div>
           </Col>
         </Row>
+
+        {/*  */}
+
         {/*  */}
         <Row align={"middle"}>
           <Col style={{ margin: "10px" }}>
@@ -775,14 +813,6 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
               />
             </div>
           </Col>
-        </Row>
-        {/*
-         */}
-        <Row align={"middle"}>
-          <Col style={{ margin: "10px" }}>
-            <div style={{ width: 42 }}></div>
-          </Col>
-
           <Col style={{ margin: "10px" }}>
             <Typography.Text strong>Hi-res step </Typography.Text>
             <div>
@@ -814,6 +844,9 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             </div>
           </Col>
         </Row>
+        {/*
+         */}
+
         {/*  */}
 
         <Row align={"middle"}>
@@ -858,10 +891,7 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
               />
             </div>
           </Col>
-        </Row>
-        {/*  */}
 
-        <Row align={"middle"}>
           <Col style={{ margin: "10px" }}>
             <Typography.Text strong>Config scale </Typography.Text>
             <div>
@@ -890,6 +920,7 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             </div>
           </Col>
         </Row>
+        {/*  */}
 
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Female images</Typography.Text>

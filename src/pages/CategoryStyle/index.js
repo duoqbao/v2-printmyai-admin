@@ -1,33 +1,103 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { MenuOutlined } from "@ant-design/icons";
+import { DndContext } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
-  Row,
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  Table,
+  Typography,
+  Button,
+  Popconfirm,
+  message,
   Col,
   Card,
-  Table,
-  Avatar,
-  Button,
-  message,
-  Popconfirm,
-  Modal,
-  Input,
-  Typography,
 } from "antd";
+import { ModalCreate, ModalEdit } from "./component";
+import ApiStyles from "api/styles";
+import { useHistory } from "react-router-dom";
+
+import React, { useState, useEffect } from "react";
 import {
   EyeOutlined,
   PlusOutlined,
   DeleteOutlined,
   EditFilled,
 } from "@ant-design/icons";
-import ApiStyles from "api/styles";
-export default function Styles() {
+
+const Row = ({ children, ...props }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: props["data-row-key"],
+  });
+  const style = {
+    ...props.style,
+    transform: CSS.Transform.toString(
+      transform && {
+        ...transform,
+        scaleY: 1,
+      }
+    ),
+    transition,
+    ...(isDragging
+      ? {
+          position: "relative",
+          zIndex: 9999,
+        }
+      : {}),
+  };
+  return (
+    <tr {...props} ref={setNodeRef} style={style} {...attributes}>
+      {React.Children.map(children, (child) => {
+        if (child.key === "sort") {
+          return React.cloneElement(child, {
+            children: (
+              <MenuOutlined
+                ref={setActivatorNodeRef}
+                style={{
+                  touchAction: "none",
+                  cursor: "move",
+                }}
+                {...listeners}
+              />
+            ),
+          });
+        }
+        return child;
+      })}
+    </tr>
+  );
+};
+const App = ({}) => {
   const history = useHistory();
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [openAddModal, setOpenAddModal] = useState(false);
+
   const getDataById = (id) => {
     history.push({ pathname: `/category-styles/${id}/styles`, params: { id } });
   };
-  const [openEdit, setOpenEdit] = useState(false);
+
+  const deleteData = async (id) => {
+    try {
+      await ApiStyles.deletCategoryById(id);
+      message.success("Successfully deleted");
+      getData();
+    } catch (error) {
+      message.error(error.message);
+    }
+  };
+
   const columns = [
     {
       title: "Name",
@@ -75,11 +145,15 @@ export default function Styles() {
         );
       },
     },
+    {
+      key: "sort",
+    },
   ];
+
   const getData = async () => {
     setLoading(true);
     const res = await ApiStyles.getList();
-    setData(
+    setDataSource(
       res.map((item) => {
         return {
           ...item,
@@ -89,104 +163,83 @@ export default function Styles() {
     );
     setLoading(false);
   };
-  const deleteData = async (id) => {
-    try {
-      const res = await ApiStyles.delete(id);
-      message.success("Successfully deleted");
-      getData();
-    } catch (error) {
-      message.error(error.message);
+
+  const [openEdit, setOpenEdit] = useState(false);
+  const [dataSource, setDataSource] = useState([]);
+  const [fetchAfterSortComplete, setFetchAfterSortComplete] = useState(false);
+  const onDragEnd = ({ active, over }) => {
+    if (active.id !== over?.id) {
+      setDataSource((previous) => {
+        const activeIndex = previous.findIndex((i) => i.key === active.id);
+        const overIndex = previous.findIndex((i) => i.key === over?.id);
+        return arrayMove(previous, activeIndex, overIndex);
+      });
+      setFetchAfterSortComplete((prev) => !prev);
     }
   };
-  const [openAddModal, setOpenAddModal] = useState(false);
 
   useEffect(() => {
     getData();
-  }, [openAddModal, openEdit]);
+  }, [openEdit, openAddModal]);
 
+  useEffect(() => {
+    (async () => {
+      if (dataSource.length > 0) {
+        try {
+          await ApiStyles.sort(dataSource);
+        } catch (err) {
+          message.error("sort error");
+        }
+      }
+    })();
+  }, [fetchAfterSortComplete]);
   return (
     <div className="layout-styles">
-      <Row gutter={[24, 24]}>
-        <Col xs={24} xl={24}>
-          <Card
-            bordered={false}
-            className="criclebox tablespace mb-24"
-            title="Category"
-          >
-            <div
-              style={{ display: "flex", justifyContent: "right", padding: 12 }}
-            >
-              <Button
-                onClick={() => {
-                  setOpenAddModal(true);
-                }}
-                type="primary"
-                icon={<PlusOutlined />}
-              >
-                Add
-              </Button>
-            </div>
-            <div className="table-responsive">
-              <Table
-                columns={columns}
-                dataSource={data}
-                pagination={false}
-                className="ant-border-space"
-                loading={loading}
-              />
-            </div>
-          </Card>
-        </Col>
-      </Row>
       <ModalCreate open={openAddModal} onClose={() => setOpenAddModal(false)} />
+      <Col xs={24} xl={24}>
+        <Card
+          bordered={false}
+          className="criclebox tablespace mb-24"
+          title="Category"
+        >
+          <div
+            style={{ display: "flex", justifyContent: "right", padding: 12 }}
+          >
+            <Button
+              onClick={() => {
+                setOpenAddModal(true);
+              }}
+              type="primary"
+              icon={<PlusOutlined />}
+            >
+              Add
+            </Button>
+          </div>
+          <div className="table-responsive">
+            <DndContext
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={onDragEnd}
+            >
+              <SortableContext
+                items={dataSource.map((i) => i.key)}
+                strategy={verticalListSortingStrategy}
+              >
+                <Table
+                  components={{
+                    body: {
+                      row: Row,
+                    },
+                  }}
+                  rowKey="key"
+                  columns={columns}
+                  dataSource={dataSource}
+                />
+              </SortableContext>
+            </DndContext>
+          </div>
+        </Card>
+      </Col>
     </div>
   );
-}
-
-const ModalEdit = ({ open, onClose, item }) => {
-  const [name, setName] = useState(item.name || "");
-  const onOk = async () => {
-    try {
-      await ApiStyles.updateCategoryById(item._id, { name });
-      setName("");
-      message.success("Success");
-      onClose();
-    } catch (err) {
-      console.log(err);
-      message.success(err?.data?.message || "Error");
-    }
-  };
-  return (
-    <Modal open={open} onOk={onOk} onCancel={onClose}>
-      <Typography.Text>Name</Typography.Text>
-      <Input
-        placeholder="Input name's category"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-    </Modal>
-  );
 };
-
-const ModalCreate = ({ open, onClose }) => {
-  const [name, setName] = useState("");
-  const onOk = async () => {
-    try {
-      await ApiStyles.create({ name });
-      setName("");
-      message.success("Success");
-      onClose();
-    } catch (err) {
-      message.success(err?.data?.message || "Error");
-    }
-  };
-  return (
-    <Modal open={open} onOk={onOk} onCancel={onClose}>
-      <Typography.Text>Name</Typography.Text>
-      <Input
-        placeholder="Input name's category"
-        onChange={(e) => setName(e.target.value)}
-      />
-    </Modal>
-  );
-};
+export default App;

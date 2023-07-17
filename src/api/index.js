@@ -1,7 +1,7 @@
 import axios from "axios";
 import queryString from "query-string";
-export const API_URL = "https://api.ungdunggiare.com/api";
-// export const API_URL = "http://localhost:4040/api";
+// export const API_URL = "https://api.ungdunggiare.com/api";
+export const API_URL = "http://localhost:4040/api";
 
 const client = axios.create({
   baseURL: `${API_URL}`,
