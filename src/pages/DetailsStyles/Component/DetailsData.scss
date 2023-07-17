@@ -1,0 +1,11 @@
+.DetailsData{
+    .input{
+         display: flex;
+         flex-direction: column;
+         gap: 4px;
+         label{
+             font-weight: 700;
+             font-size: 15px;
+         }
+    }
+}

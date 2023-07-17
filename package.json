@@ -1,0 +1,67 @@
+{
+  "name": "print-admin",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^4.6.2",
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/modifiers": "^6.0.1",
+    "@dnd-kit/sortable": "^7.0.2",
+    "@dnd-kit/utilities": "^3.2.1",
+    "@reduxjs/toolkit": "^1.9.3",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "antd": "^4.24.0",
+    "antd-button-color": "^1.0.4",
+    "apexcharts": "^3.27.1",
+    "axios": "0.27.2",
+    "browserify": "^17.0.0",
+    "color-convert": "^2.0.1",
+    "gsap": "^3.11.5",
+    "install": "^0.13.0",
+    "moment": "^2.29.4",
+    "nprogress": "^0.2.0",
+    "process": "^0.11.10",
+    "react": "^17.0.2",
+    "react-apexcharts": "^1.3.9",
+    "react-color": "^2.19.3",
+    "react-dom": "^17.0.2",
+    "react-gallery-carousel": "^0.4.0",
+    "react-image-file-resizer": "^0.4.8",
+    "react-loadable": "^5.5.0",
+    "react-owl-carousel": "^2.3.3",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "sass": "^1.55.0",
+    "styled-components": "^5.3.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "node-sass": "^8.0.0"
+  }
+}

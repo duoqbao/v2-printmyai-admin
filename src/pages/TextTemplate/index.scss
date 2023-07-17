@@ -1,0 +1,21 @@
+.textTemplate {
+  .image-item {
+    position: relative;
+    height: 100%;
+    width: 200px;
+    background: #f6f6f6;
+
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .image-icon {
+      position: absolute;
+      top: -5px;
+      cursor: pointer;
+      right: 0px;
+      font-size: 20px;
+      z-index: 10;
+    }
+  }
+}

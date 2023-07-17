@@ -1,0 +1,77 @@
+@import "../../assets/styles/__variable";
+.product {
+  .ant-card{
+     height: 100%;
+  }
+  .card {
+    // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
+    font-family: arial;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+    .ant-image {
+      width: 80%;
+    }
+  }
+
+  .price {
+    color: grey;
+    font-size: 22px;
+    text-decoration: none;
+  }
+  .sale {
+    color: red;
+    text-decoration: none;
+ }
+  // .card button {
+  //   border: none;
+  //   outline: 0;
+  //   padding: 12px;
+  //   color: white;
+  //   background-color: #000;
+  //   text-align: center;
+  //   cursor: pointer;
+  //   width: 100%;
+  //   font-size: 18px;
+  // }
+  .button-flex {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 12px;
+  }
+  .onSale {
+    background-color: $Green;
+  }
+  .card button:hover {
+    opacity: 0.7;
+  }
+  .ant-select {
+    width: 100%;
+  }
+
+  .input {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    .ant-select-selector {
+      height: 40px !important;
+      display: flex;
+      align-items: center;
+    }
+    .ant-checkbox + span {
+      white-space: nowrap;
+    }
+  }
+}
+.customHeightInput{
+   height: 40px !important;
+   .ant-input{
+      height: auto !important;
+   }
+}

@@ -1,0 +1,44 @@
+.layout-styles {
+  .ant-collapse-header {
+    display: flex;
+    align-items: center !important;
+    justify-content: space-between;
+  }
+  .darkbtn {
+    color: gray;
+  }
+  .addMore {
+    padding-top: 12px;
+    display: flex;
+    h3 {
+      text-decoration-line: underline;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      color: #212b36;
+      cursor: pointer;
+    }
+  }
+  .ant-card-body{
+    padding: 15px !important;
+  }
+  .ant-card{
+      box-shadow: none;
+  }
+  .input {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    .ant-select-single .ant-select-selector {
+      height: 40px;
+      border-radius: 8px;
+    }
+    .ant-select-single .ant-select-selector .ant-select-selection-item,
+    .ant-select-single
+      .ant-select-selector
+      .ant-select-selection-placeholder {
+      line-height: 37px;
+    }
+  }
+}
