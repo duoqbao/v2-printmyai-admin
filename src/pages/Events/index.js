@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Input, DatePicker, Button, message, Spin } from "antd";
+import {
+  Card,
+  Col,
+  Row,
+  Input,
+  DatePicker,
+  Button,
+  message,
+  Spin,
+  Switch,
+  Typography,
+} from "antd";
 import EventApi from "api/events";
 import moment from "moment";
 import UploadInput from "components/UpLoad/index";
@@ -53,55 +64,87 @@ export default function Events() {
     try {
       const res = await EventApi.update(event);
       message.success("Updated event");
-    } catch (error) {}
+    } catch (error) {
+      message.error("Update failed");
+    }
+  };
+  const updateActive = async (e) => {
+    try {
+      setLoading(true);
+      await EventApi.update({ ...event, active: e });
+      message.success("Updated");
+    } catch (err) {
+      message.error("Update failed");
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="events layout-content">
       {" "}
       <Spin spinning={loading}>
-        <Row gutter={[24, 24]}>
-          <Col span={24} className="mb-24">
-            <Card
-              className="header-solid h-full"
-              bordered={false}
-              title={[<h6 className="font-semibold m-0">Events Details</h6>]}
-              bodyStyle={{ paddingTop: "0" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                }}
+        {event?.active && (
+          <Row gutter={[24, 24]}>
+            <Col span={24} className="mb-24">
+              <Card
+                className="header-solid h-full"
+                bordered={false}
+                title={[<h6 className="font-semibold m-0">Events Details</h6>]}
+                bodyStyle={{ paddingTop: "0" }}
               >
-                <Col span={12}>
-                  <Card
-                    className="header-solid h-full event-details"
-                    bordered={true}
-                    bodyStyle={{ paddingTop: "0" }}
-                    style={{
-                      height: "400px",
-                      backgroundImage: `url(${event.bannerImageUrl})`,
-                    }}
-                  >
-                    <CountdownTimer targetDate={event.expriredAt} />
-                    <div style={{ position: "relative", top: "40%" }}>
-                      <Card>
-                        <div className="event-item">
-                          <div className="event-name">{event.description}</div>
-                          <div className="event-description"></div>
-                        </div>
-                      </Card>
-                    </div>
-                  </Card>
-                </Col>
-              </div>
-            </Card>
-          </Col>
-        </Row>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Col span={12}>
+                    <Card
+                      className="header-solid h-full event-details"
+                      bordered={true}
+                      bodyStyle={{ paddingTop: "0" }}
+                      style={{
+                        height: "400px",
+                        backgroundImage: `url(${event.bannerImageUrl})`,
+                      }}
+                    >
+                      <CountdownTimer targetDate={event.expriredAt} />
+                      <div style={{ position: "relative", top: "40%" }}>
+                        <Card>
+                          <div className="event-item">
+                            <div className="event-name">
+                              {event.description}
+                            </div>
+                            <div className="event-description"></div>
+                          </div>
+                        </Card>
+                      </div>
+                    </Card>
+                  </Col>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        )}
         <Row gutter={[24, 24]}>
           <Col span={24}>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Row align={"middle"}>
+                <Typography.Text strong style={{ margin: "0px 10px" }}>
+                  {" "}
+                  Active Sale
+                </Typography.Text>
+                <Switch
+                  loading={loading}
+                  disabled={loading}
+                  checked={event?.active}
+                  onChange={(checked) => {
+                    setEvent({ ...event, active: checked });
+                    updateActive(checked);
+                  }}
+                />
+              </Row>
               <Button onClick={() => handleUpdate()} type="primary">
                 Update
               </Button>

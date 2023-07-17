@@ -25,7 +25,7 @@ import ChangeSize from "./ChangeSize";
 import ModalSale from "./ModalSale";
 import UploadInput from "components/UpLoad";
 import { uploadImage } from "api/upload";
-import { InfoCircleFilled } from "@ant-design/icons";
+import { InfoCircleFilled, LoadingOutlined } from "@ant-design/icons";
 function removeEmptyFields(obj) {
   for (let prop in obj) {
     if (
@@ -182,6 +182,7 @@ export default function Products() {
       message.error("Input price is required");
       return;
     }
+    console.log(productAdd);
     const product = removeEmptyFields(productAdd);
     try {
       if (productAdd._id) {
@@ -570,7 +571,30 @@ export default function Products() {
                   />
                 </div>
               </Col>
-
+              <Col span={24}>
+                <Col>
+                  <div>
+                    <Typography.Text strong>Size chart</Typography.Text>
+                  </div>
+                  {productAdd?.sizeImage ? (
+                    <>
+                      <Image
+                        src={productAdd.sizeImage}
+                        width={100}
+                        height={100}
+                        style={{ borderRadius: 5 }}
+                      />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </Col>
+                <SizeImage
+                  onChange={(e) =>
+                    setProductAdd({ ...productAdd, sizeImage: e })
+                  }
+                />
+              </Col>
               <Col span={24}>
                 <div className="input">
                   <label>Provider </label>
@@ -645,3 +669,43 @@ export default function Products() {
     </div>
   );
 }
+
+const SizeImage = ({ onChange }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleUploadFiles = async (files) => {
+    setLoading(true);
+    const data = await Promise.all(
+      files.map(async (file) => {
+        const res = await uploadImage(file);
+        return res;
+      })
+    );
+    onChange(data[0]);
+    setLoading(false);
+  };
+
+  const handleFileEvent = (e) => {
+    const chosenFiles = Array.prototype.slice.call(e.target.files);
+    handleUploadFiles(chosenFiles);
+  };
+
+  return (
+    <div className="">
+      <input
+        id={`fileUpload`}
+        type="file"
+        accept="image/*"
+        onChange={handleFileEvent}
+        style={{ display: "none" }}
+      />
+      {loading ? (
+        <Spin spinning indicator={<LoadingOutlined />} />
+      ) : (
+        <label htmlFor={`fileUpload`}>
+          <a className={`btn btn-primary `}>Upload Files</a>
+        </label>
+      )}
+    </div>
+  );
+};
