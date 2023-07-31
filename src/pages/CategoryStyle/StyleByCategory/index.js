@@ -23,15 +23,31 @@ import {
   Popconfirm,
 } from "antd";
 import { API_URL } from "api";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Api from "../../../api/styles";
 import { uploadImage } from "../../../api/upload";
+
 export default function StyleByCategory() {
   const { categoryId } = useParams();
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
   const [category, setCategory] = useState({ name: "Category" });
+  const [options, setOptions] = useState({
+    samplers: [],
+    faceSwapUpscalers: [],
+    faceRestorers: [],
+    hiResUpscalers: [],
+    models: [],
+  });
+  useEffect(() => {
+    (async () => {
+      const data = await Api.getOptions();
+      setOptions(data);
+    })();
+  }, []);
+
   useEffect(() => {
     if (categoryId)
       (async () => {
@@ -75,7 +91,6 @@ export default function StyleByCategory() {
       <div
         style={{
           display: "flex",
-          alignItems: "center",
           flexWrap: "wrap",
         }}
       >
@@ -88,10 +103,12 @@ export default function StyleByCategory() {
             key={item._id}
             item={item}
             afterEdit={() => setRefetch((prev) => !prev)}
+            options={options}
           />
         ))}
       </div>
       <AddModal
+        options={options}
         open={open}
         onClose={(e) => {
           setOpen(false);
@@ -104,34 +121,43 @@ export default function StyleByCategory() {
   );
 }
 
-const AddModal = ({ open, onClose }) => {
+const AddModal = ({ open, onClose, options }) => {
   const { categoryId } = useParams();
   const [state, setState] = useState({
     name: "",
-    premium: false,
+    premium: true,
     credit: 1,
     femalePrompt: "",
     femaleExamples: [],
     malePrompt: "",
     maleExamples: [],
     negative: "",
-    model: "",
-    sampler: "",
-    clipSkip: 0,
-    step: 30,
-    hiRes: false,
+    model: "absolutereality_v16.safetensors [be1d90c4ab]",
+    sampler: "Euler",
+    clipSkip: 1,
+    step: 20,
+    hiRes: true,
     hiResStep: 20,
-    upscaler: "",
-    upscaledBy: 2,
+    hiResUpscaler: "4x-UltraSharp",
+    hiResUpscaledBy: 2,
     denoisingStrength: 0.45,
     width: 512,
     height: 768,
-    numberOfImage: 2,
+    batchCount: 1,
+    batchSize: 6,
     seed: -1,
     configScale: 7,
+    faceSwap: true,
+    faceSwapUpscaler: "4x-UltraSharp",
+    faceSwapUpscaledBy: 1,
+    restoreFace: "CodeFormer",
   });
   const [loading, setLoading] = useState(false);
   const onOk = async () => {
+    if (!state.femalePrompt && !state.malePrompt) {
+      message.error("Include at least one prompt. Female or Male one");
+      return;
+    }
     try {
       setLoading(true);
       const data = await Api.createStyleByCategoryId(categoryId, state);
@@ -141,6 +167,36 @@ const AddModal = ({ open, onClose }) => {
     } finally {
       setLoading(false);
     }
+    setState({
+      name: "",
+      premium: true,
+      credit: 1,
+      femalePrompt: "",
+      femaleExamples: [],
+      malePrompt: "",
+      maleExamples: [],
+      negative: "",
+      model: "absolutereality_v16.safetensors [be1d90c4ab]",
+      sampler: "Euler",
+      clipSkip: 1,
+      step: 20,
+      hiRes: true,
+      hiResStep: 20,
+      hiResUpscaler: "",
+      hiResUpscaledBy: 2,
+      denoisingStrength: 0.45,
+      width: 512,
+      height: 768,
+      batchCount: 1,
+      batchSize: 6,
+      seed: -1,
+      configScale: 7,
+      faceSwap: true,
+      faceSwapUpscaler: "4x-UltraSharp",
+      faceSwapUpscaledBy: 1,
+      restoreFace: "CodeFormer",
+      maleNegative: "",
+    });
   };
   return (
     <Modal
@@ -207,10 +263,20 @@ const AddModal = ({ open, onClose }) => {
 
       <Col style={{ marginTop: "10px" }}>
         <Typography.Text strong>Negative prompt</Typography.Text>
-        <Input
+        <Input.TextArea
+          size={10}
           placeholder="Input female prompt text"
           onChange={(e) => setState({ ...state, negative: e.target.value })}
           value={state.negative}
+        />
+      </Col>
+      <Col style={{ marginTop: "10px" }}>
+        <Typography.Text strong>Male negative prompt</Typography.Text>
+        <Input.TextArea
+          size={10}
+          placeholder="Input female prompt text"
+          onChange={(e) => setState({ ...state, maleNegative: e.target.value })}
+          value={state.maleNegative}
         />
       </Col>
 
@@ -220,12 +286,14 @@ const AddModal = ({ open, onClose }) => {
           <Typography.Text strong>Model</Typography.Text>
           <div>
             <Select
+              value={state?.model}
               placeholder="Select model"
               style={{ width: 200 }}
               onChange={(e) => setState({ ...state, model: e })}
             >
-              <Select.Option value="Selection 1">Something</Select.Option>
-              <Select.Option value="Selection 2">Something</Select.Option>
+              {options?.models.map((i) => {
+                return <Select.Option value={i.title}>{i.title}</Select.Option>;
+              })}
             </Select>
           </div>
         </Col>
@@ -247,12 +315,13 @@ const AddModal = ({ open, onClose }) => {
           <Typography.Text strong>Sampler</Typography.Text>
           <div>
             <Select
-              placeholder="Select model"
               style={{ width: 200 }}
               onChange={(e) => setState({ ...state, sampler: e })}
+              value={state?.sampler}
             >
-              <Select.Option value="Selection 1">Something</Select.Option>
-              <Select.Option value="Selection 2">Something</Select.Option>
+              {options?.samplers.map((item) => (
+                <Select.Option value={item.name}>{item.name}</Select.Option>
+              ))}
             </Select>
           </div>
         </Col>
@@ -278,7 +347,11 @@ const AddModal = ({ open, onClose }) => {
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Hi-res</Typography.Text>
           <div>
-            <Switch onChange={(e) => setState({ ...state, hiRes: e })} />
+            <Switch
+              value={state?.hiRes}
+              onChange={(e) => setState({ ...state, hiRes: e })}
+              checked={state.hiRes}
+            />
           </div>
         </Col>
 
@@ -287,11 +360,13 @@ const AddModal = ({ open, onClose }) => {
           <div>
             <Select
               placeholder="Select model"
-              style={{ width: 200 }}
-              onChange={(e) => setState({ ...state, upscaler: e })}
+              style={{ width: 300 }}
+              onChange={(e) => setState({ ...state, hiResUpscaler: e })}
+              value={state?.hiResUpscaler}
             >
-              <Select.Option value="Selection 1">Something</Select.Option>
-              <Select.Option value="Selection 2">Something</Select.Option>
+              {options.faceSwapUpscalers.map((item) => (
+                <Select.Option value={item.name}>{item.name}</Select.Option>
+              ))}
             </Select>
           </div>
         </Col>
@@ -302,11 +377,11 @@ const AddModal = ({ open, onClose }) => {
           <div>
             <Input
               style={{ maxWidth: 120 }}
-              value={state.upscaledBy}
+              value={state.hiResUpscaledBy}
               type={"number"}
               min={0}
               onChange={(e) =>
-                setState({ ...state, upscaledBy: e.target.value })
+                setState({ ...state, hiResUpscaledBy: e.target.value })
               }
             />
           </div>
@@ -376,16 +451,31 @@ const AddModal = ({ open, onClose }) => {
         </Col>
         <Col style={{ margin: "10px" }}>
           <Typography.Text style={{ margin: "0px 5px" }} strong>
-            Number of Images
+            Batch count
           </Typography.Text>
           <div>
             <Input
               style={{ maxWidth: 120 }}
-              value={state.numberOfImage}
+              value={state.batchCount}
               type={"number"}
               min={0}
               onChange={(e) =>
-                setState({ ...state, numberOfImage: e.target.value })
+                setState({ ...state, batchCount: e.target.value })
+              }
+            />
+          </div>
+        </Col>
+
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Batch size</Typography.Text>
+          <div>
+            <Input
+              style={{ maxWidth: 120 }}
+              value={state.batchSize}
+              type={"number"}
+              min={0}
+              onChange={(e) =>
+                setState({ ...state, batchSize: e.target.value })
               }
             />
           </div>
@@ -419,6 +509,66 @@ const AddModal = ({ open, onClose }) => {
           </div>
         </Col>
       </Row>
+      {/*  */}
+      <Row align={"middle"}>
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Face-swap</Typography.Text>
+          <div>
+            <Switch
+              onChange={(e) => setState({ ...state, faceSwap: e })}
+              checked={state.faceSwap}
+            />
+          </div>
+        </Col>
+
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Restore face </Typography.Text>
+          <div>
+            <Select
+              placeholder="Select model"
+              style={{ width: 200 }}
+              onChange={(e) => setState({ ...state, restoreFace: e })}
+              value={state?.restoreFace}
+            >
+              {options.faceRestorers.map((item) => (
+                <Select.Option value={item.name}>{item.name}</Select.Option>
+              ))}
+            </Select>
+          </div>
+        </Col>
+
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Upscaler</Typography.Text>
+          <div>
+            <Select
+              placeholder="Select model"
+              style={{ width: 300 }}
+              onChange={(e) => setState({ ...state, faceSwapUpscaler: e })}
+              value={state?.faceSwapUpscaler}
+            >
+              {options.faceSwapUpscalers.map((item) => (
+                <Select.Option value={item.name}>{item.name}</Select.Option>
+              ))}
+            </Select>
+          </div>
+        </Col>
+
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Upscaled by</Typography.Text>
+          <div>
+            <Input
+              style={{ maxWidth: 120 }}
+              value={state.faceSwapUpscaledBy}
+              type={"number"}
+              min={0}
+              onChange={(e) =>
+                setState({ ...state, faceSwapUpscaledBy: e.target.value })
+              }
+            />
+          </div>
+        </Col>
+      </Row>
+
       {/*  */}
 
       <Col style={{ margin: "10px" }}>
@@ -555,6 +705,7 @@ const Style = ({
   onDelete,
   item,
   afterEdit,
+  options,
 }) => {
   const [edit, setEdit] = useState(false);
   return (
@@ -567,10 +718,7 @@ const Style = ({
         borderRadius: 10,
       }}
     >
-      <Col
-        align="center"
-        style={{ width: 200, margin: "0px 20px", height: 300 }}
-      >
+      <Col align="center" style={{ width: 200, margin: "0px 20px" }}>
         <Typography.Title level={3} strong style={{ textAlign: "center" }}>
           {name}
         </Typography.Title>
@@ -590,7 +738,17 @@ const Style = ({
             <Typography.Text />
           )}
         </div>
-        <Card cover={<img alt="example" src={image} />}>
+        <Card
+          cover={
+            <img
+              alt="example"
+              src={image}
+              style={{ maxWidth: "100%", height: "auto" }}
+            />
+          }
+          type="inner"
+          bodyStyle={{ height: "100%" }}
+        >
           <Row justify={"space-between"} align="middle">
             <Button
               icon={<EditFilled />}
@@ -613,12 +771,13 @@ const Style = ({
           setEdit(false);
         }}
         data={item}
+        options={options}
       />
     </div>
   );
 };
 
-const EditModal = ({ open, onClose, data, afterEdit }) => {
+const EditModal = ({ open, onClose, data, afterEdit, options }) => {
   const [state, setState] = useState(data);
   const [loading, setLoading] = useState(false);
 
@@ -664,7 +823,7 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
               Premium{" "}
             </Typography.Text>
             <Switch
-              checked={state.premium}
+              checked={state?.premium}
               onChange={(e) => setState({ ...state, premium: e })}
             />
           </Row>
@@ -706,13 +865,24 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
         {/*  */}
         <Col style={{ marginTop: "10px" }}>
           <Typography.Text strong>Negative prompt</Typography.Text>
-          <Input
+          <Input.TextArea
+            size={10}
             placeholder="Input female prompt text"
             onChange={(e) => setState({ ...state, negative: e.target.value })}
             value={state.negative}
           />
         </Col>
-
+        <Col style={{ marginTop: "10px" }}>
+          <Typography.Text strong>Male negative prompt</Typography.Text>
+          <Input.TextArea
+            size={10}
+            placeholder="Input female prompt text"
+            onChange={(e) =>
+              setState({ ...state, maleNegative: e.target.value })
+            }
+            value={state.maleNegative}
+          />
+        </Col>
         {/*  */}
         <Row align={"middle"} style={{ marginTop: "10px" }}>
           <Col style={{ margin: "10px" }}>
@@ -720,14 +890,19 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             <div>
               <Select
                 placeholder="Select model"
+                value={state?.model}
                 style={{ width: 200 }}
                 onChange={(e) => setState({ ...state, model: e })}
               >
-                <Select.Option value="Selection 1">Something</Select.Option>
-                <Select.Option value="Selection 2">Something</Select.Option>
+                {options?.models.map((i) => {
+                  return (
+                    <Select.Option value={i.title}>{i.title}</Select.Option>
+                  );
+                })}
               </Select>
             </div>
           </Col>
+
           <Col style={{ margin: "10px" }}>
             <Typography.Text style={{ margin: "0px 5px" }} strong>
               Clip skip
@@ -751,9 +926,11 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
                 placeholder="Select model"
                 style={{ width: 200 }}
                 onChange={(e) => setState({ ...state, sampler: e })}
+                value={state?.sampler}
               >
-                <Select.Option value="Selection 1">Something</Select.Option>
-                <Select.Option value="Selection 2">Something</Select.Option>
+                {options?.samplers.map((item) => (
+                  <Select.Option value={item.name}>{item.name}</Select.Option>
+                ))}
               </Select>
             </div>
           </Col>
@@ -780,7 +957,10 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
           <Col style={{ margin: "10px" }}>
             <Typography.Text strong>Hi-res</Typography.Text>
             <div>
-              <Switch onChange={(e) => setState({ ...state, hiRes: e })} />
+              <Switch
+                onChange={(e) => setState({ ...state, hiRes: e })}
+                checked={state?.hiRes}
+              />
             </div>
           </Col>
 
@@ -790,10 +970,12 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
               <Select
                 placeholder="Select model"
                 style={{ width: 200 }}
-                onChange={(e) => setState({ ...state, upscaler: e })}
+                onChange={(e) => setState({ ...state, hiResUpscaler: e })}
+                value={state?.hiResUpscaler}
               >
-                <Select.Option value="Selection 1">Something</Select.Option>
-                <Select.Option value="Selection 2">Something</Select.Option>
+                {options?.faceSwapUpscalers.map((item) => (
+                  <Select.Option value={item.name}>{item.name}</Select.Option>
+                ))}
               </Select>
             </div>
           </Col>
@@ -804,11 +986,11 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
             <div>
               <Input
                 style={{ maxWidth: 120 }}
-                value={state.upscaledBy}
+                value={state.hiResUpscaledBy}
                 type={"number"}
                 min={0}
                 onChange={(e) =>
-                  setState({ ...state, upscaledBy: e.target.value })
+                  setState({ ...state, hiResUpscaledBy: e.target.value })
                 }
               />
             </div>
@@ -877,16 +1059,33 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
           </Col>
           <Col style={{ margin: "10px" }}>
             <Typography.Text style={{ margin: "0px 5px" }} strong>
-              Number of Images
+              Batch count
             </Typography.Text>
             <div>
               <Input
                 style={{ maxWidth: 120 }}
-                value={state.numberOfImage}
+                value={state.batchCount}
                 type={"number"}
                 min={0}
                 onChange={(e) =>
-                  setState({ ...state, numberOfImage: e.target.value })
+                  setState({ ...state, batchCount: e.target.value })
+                }
+              />
+            </div>
+          </Col>
+
+          <Col style={{ margin: "10px" }}>
+            <Typography.Text style={{ margin: "0px 5px" }} strong>
+              Batch size
+            </Typography.Text>
+            <div>
+              <Input
+                style={{ maxWidth: 120 }}
+                value={state.batchSize}
+                type={"number"}
+                min={0}
+                onChange={(e) =>
+                  setState({ ...state, batchSize: e.target.value })
                 }
               />
             </div>
@@ -921,7 +1120,62 @@ const EditModal = ({ open, onClose, data, afterEdit }) => {
           </Col>
         </Row>
         {/*  */}
-
+        <Row align={"middle"}>
+          <Col style={{ margin: "10px" }}>
+            <Typography.Text strong>Face-swap</Typography.Text>
+            <div>
+              <Switch
+                onChange={(e) => setState({ ...state, faceSwap: e })}
+                checked={state.faceSwap}
+              />
+            </div>
+          </Col>
+          <Col style={{ margin: "10px" }}>
+            <Typography.Text strong>Upscaler</Typography.Text>
+            <div>
+              <Select
+                placeholder="Select model"
+                style={{ width: 200 }}
+                onChange={(e) => setState({ ...state, faceSwapUpscaler: e })}
+                value={state?.faceSwapUpscaler}
+              >
+                {options?.faceSwapUpscalers.map((item) => (
+                  <Select.Option value={item.name}>{item.name}</Select.Option>
+                ))}
+              </Select>
+            </div>
+          </Col>
+          <Col style={{ margin: "10px" }}>
+            <Typography.Text strong>Restore face </Typography.Text>
+            <div>
+              <Select
+                placeholder="Select model"
+                style={{ width: 200 }}
+                onChange={(e) => setState({ ...state, restoreFace: e })}
+                value={state?.restoreFace}
+              >
+                {options.faceRestorers.map((item) => (
+                  <Select.Option value={item.name}>{item.name}</Select.Option>
+                ))}
+              </Select>
+            </div>
+          </Col>
+          <Col style={{ margin: "10px" }}>
+            <Typography.Text strong>Upscaled by</Typography.Text>
+            <div>
+              <Input
+                style={{ maxWidth: 120 }}
+                value={state.upscaledBy}
+                type={"number"}
+                min={0}
+                onChange={(e) =>
+                  setState({ ...state, upscaledBy: e.target.value })
+                }
+              />
+            </div>
+          </Col>
+        </Row>
+        {/*  */}
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Female images</Typography.Text>
           <Row align={"middle"}>

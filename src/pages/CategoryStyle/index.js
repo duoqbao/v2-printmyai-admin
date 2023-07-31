@@ -83,7 +83,7 @@ const App = ({}) => {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [openAddModal, setOpenAddModal] = useState(false);
-
+  const [currentEdit, setCurrentEdit] = useState({});
   const getDataById = (id) => {
     history.push({ pathname: `/category-styles/${id}/styles`, params: { id } });
   };
@@ -112,14 +112,9 @@ const App = ({}) => {
       render: (item) => {
         return (
           <div style={{ display: "flex", gap: "6px" }}>
-            <ModalEdit
-              open={openEdit}
-              onClose={() => setOpenEdit(false)}
-              item={item}
-            />
-
             <Button
               onClick={() => {
+                setCurrentEdit(item);
                 setOpenEdit(true);
               }}
               type="primary"
@@ -239,6 +234,13 @@ const App = ({}) => {
           </div>
         </Card>
       </Col>
+      {openEdit && (
+        <ModalEdit
+          open={openEdit}
+          onClose={() => setOpenEdit(false)}
+          item={currentEdit}
+        />
+      )}
     </div>
   );
 };

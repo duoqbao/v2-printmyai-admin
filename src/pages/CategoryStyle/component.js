@@ -21,7 +21,7 @@ import {
 } from "@ant-design/icons";
 import ApiStyles from "api/styles";
 export const ModalEdit = ({ open, onClose, item }) => {
-  const [name, setName] = useState(item.name || "");
+  const [name, setName] = useState(item.name);
   const onOk = async () => {
     try {
       await ApiStyles.updateCategoryById(item._id, { name });
@@ -62,6 +62,7 @@ export const ModalCreate = ({ open, onClose }) => {
       <Typography.Text>Name</Typography.Text>
       <Input
         placeholder="Input name's category"
+        value={name}
         onChange={(e) => setName(e.target.value)}
       />
     </Modal>

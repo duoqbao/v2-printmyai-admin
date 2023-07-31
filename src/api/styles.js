@@ -28,4 +28,7 @@ export default {
   createStyleByCategoryId: (categoryId, body) => {
     return api.post(`/styles/${categoryId}`, body);
   },
+  getOptions: () => {
+    return api.get(`/styles/config-options`);
+  },
 };
