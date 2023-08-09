@@ -31,7 +31,7 @@ export const uploadImage = (event) => {
             let formData = new FormData();
             const dataURI = dataURItoBlob(uri);
             formData.append("file", dataURI);
-            const data = await api.post(`${API_URL}/upload`, formData);
+            const data = await api.post(`${API_URL}/upload/admin`, formData);
             resolve(data.data);
           } catch (err) {
             reject(err);

@@ -123,14 +123,15 @@ export default function StyleByCategory() {
 
 const AddModal = ({ open, onClose, options }) => {
   const { categoryId } = useParams();
+  const [coupleExamples, setCoupleExamples] = useState([]);
+  const [femaleExamples, setFemaleExamples] = useState([]);
+  const [maleExamples, setMaleExamples] = useState([]);
   const [state, setState] = useState({
     name: "",
     premium: true,
     credit: 1,
     femalePrompt: "",
-    femaleExamples: [],
     malePrompt: "",
-    maleExamples: [],
     negative: "",
     model: "absolutereality_v16.safetensors [be1d90c4ab]",
     sampler: "Euler",
@@ -151,16 +152,27 @@ const AddModal = ({ open, onClose, options }) => {
     faceSwapUpscaler: "4x-UltraSharp",
     faceSwapUpscaledBy: 1,
     restoreFace: "CodeFormer",
+    faceSwapSameGender: true,
+    maleNegative: "",
+    couplePrompt: "",
+    coupleNegative: "",
   });
   const [loading, setLoading] = useState(false);
   const onOk = async () => {
-    if (!state.femalePrompt && !state.malePrompt) {
-      message.error("Include at least one prompt. Female or Male one");
+    if (!state.femalePrompt && !state.malePrompt && !state.couplePrompt) {
+      message.error(
+        "Include at least one prompt. Female or Male or Couple one"
+      );
       return;
     }
     try {
       setLoading(true);
-      const data = await Api.createStyleByCategoryId(categoryId, state);
+      const data = await Api.createStyleByCategoryId(categoryId, {
+        ...state,
+        coupleExamples,
+        femaleExamples,
+        maleExamples,
+      });
       onClose(data);
     } catch (err) {
       message.error(JSON.stringify(err));
@@ -172,9 +184,7 @@ const AddModal = ({ open, onClose, options }) => {
       premium: true,
       credit: 1,
       femalePrompt: "",
-      femaleExamples: [],
       malePrompt: "",
-      maleExamples: [],
       negative: "",
       model: "absolutereality_v16.safetensors [be1d90c4ab]",
       sampler: "Euler",
@@ -196,7 +206,13 @@ const AddModal = ({ open, onClose, options }) => {
       faceSwapUpscaledBy: 1,
       restoreFace: "CodeFormer",
       maleNegative: "",
+      faceSwapSameGender: true,
+      couplePrompt: "",
+      coupleNegative: "",
     });
+    setCoupleExamples([]);
+    setFemaleExamples([]);
+    setMaleExamples([]);
   };
   return (
     <Modal
@@ -262,7 +278,16 @@ const AddModal = ({ open, onClose, options }) => {
       </Col>
 
       <Col style={{ marginTop: "10px" }}>
-        <Typography.Text strong>Negative prompt</Typography.Text>
+        <Typography.Text strong>Couple prompt</Typography.Text>
+        <Input
+          placeholder="Input male prompt text"
+          onChange={(e) => setState({ ...state, couplePrompt: e.target.value })}
+          value={state.couplePrompt}
+        />
+      </Col>
+
+      <Col style={{ marginTop: "10px" }}>
+        <Typography.Text strong>Female Negative prompt</Typography.Text>
         <Input.TextArea
           size={10}
           placeholder="Input female prompt text"
@@ -279,7 +304,17 @@ const AddModal = ({ open, onClose, options }) => {
           value={state.maleNegative}
         />
       </Col>
-
+      <Col style={{ marginTop: "10px" }}>
+        <Typography.Text strong>Couple negative prompt</Typography.Text>
+        <Input.TextArea
+          size={10}
+          placeholder="Input female prompt text"
+          onChange={(e) =>
+            setState({ ...state, coupleNegative: e.target.value })
+          }
+          value={state.coupleNegative}
+        />
+      </Col>
       {/*  */}
       <Row align={"middle"} style={{ marginTop: "10px" }}>
         <Col style={{ margin: "10px" }}>
@@ -520,7 +555,15 @@ const AddModal = ({ open, onClose, options }) => {
             />
           </div>
         </Col>
-
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Same gender</Typography.Text>
+          <div>
+            <Switch
+              onChange={(e) => setState({ ...state, faceSwapSameGender: e })}
+              checked={state.faceSwapSameGender}
+            />
+          </div>
+        </Col>
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Restore face </Typography.Text>
           <div>
@@ -530,7 +573,7 @@ const AddModal = ({ open, onClose, options }) => {
               onChange={(e) => setState({ ...state, restoreFace: e })}
               value={state?.restoreFace}
             >
-              {options.faceRestorers.map((item) => (
+              {[{ name: "None" }, ...options.faceRestorers].map((item) => (
                 <Select.Option value={item.name}>{item.name}</Select.Option>
               ))}
             </Select>
@@ -574,28 +617,22 @@ const AddModal = ({ open, onClose, options }) => {
       <Col style={{ margin: "10px" }}>
         <Typography.Text strong>Female images</Typography.Text>
         <Row align={"middle"}>
-          {state.femaleExamples.map((item) => (
+          {femaleExamples.map((item) => (
             <ImageDeleteable
               src={item}
               key={item}
               onDelete={(e) => {
-                setState({
-                  ...state,
-                  femaleExamples: [
-                    ...state.femaleExamples.filter((i) => i != e),
-                  ],
-                });
+                setFemaleExamples((prev) => prev.filter((i) => i != e));
               }}
             />
           ))}
-          {state.femaleExamples.length < 6 && (
+          {femaleExamples.length < 6 && (
             <UploadMultiple
               onChange={(e) => {
-                setState({
-                  ...state,
-                  femaleExamples: [...state.femaleExamples, ...e],
-                });
+                console.log(e);
+                setFemaleExamples((prev) => [...prev, ...e]);
               }}
+              index="female"
             />
           )}
         </Row>
@@ -604,26 +641,43 @@ const AddModal = ({ open, onClose, options }) => {
       <Col style={{ margin: "10px" }}>
         <Typography.Text strong>Male images</Typography.Text>
         <Row align={"middle"}>
-          {state.maleExamples.map((item) => (
+          {maleExamples.map((item) => (
             <ImageDeleteable
               src={item}
               key={item}
               onDelete={(e) => {
-                setState({
-                  ...state,
-                  maleExamples: [...state.maleExamples.filter((i) => i != e)],
-                });
+                setMaleExamples((prev) => prev.filter((i) => i != e));
               }}
             />
           ))}
-          {state.maleExamples.length < 6 && (
+          {maleExamples.length < 6 && (
             <UploadMultiple
-              index={"male"}
               onChange={(e) => {
-                setState({
-                  ...state,
-                  maleExamples: [...state.maleExamples, ...e],
-                });
+                setMaleExamples((prev) => [...prev, ...e]);
+              }}
+              index="male"
+            />
+          )}
+        </Row>
+      </Col>
+
+      <Col style={{ margin: "10px" }}>
+        <Typography.Text strong>Couple images</Typography.Text>
+        <Row align={"middle"}>
+          {coupleExamples.map((item) => (
+            <ImageDeleteable
+              src={item}
+              key={item}
+              onDelete={(e) => {
+                setCoupleExamples((prev) => prev.filter((i) => i != e));
+              }}
+            />
+          ))}
+          {coupleExamples.length < 6 && (
+            <UploadMultiple
+              index="couple"
+              onChange={(e) => {
+                setCoupleExamples((prev) => [...prev, ...e]);
               }}
             />
           )}
@@ -780,14 +834,21 @@ const Style = ({
 const EditModal = ({ open, onClose, data, afterEdit, options }) => {
   const [state, setState] = useState(data);
   const [loading, setLoading] = useState(false);
-
+  const [coupleExamples, setCoupleExamples] = useState(data.coupleExamples);
+  const [femaleExamples, setFemaleExamples] = useState(data.femaleExamples);
+  const [maleExamples, setMaleExamples] = useState(data.maleExamples);
   const onOk = async () => {
     try {
       setLoading(true);
       let body = { ...state };
       delete body.categoryId;
       delete body._id;
-      await Api.update(state._id, state);
+      await Api.update(state._id, {
+        ...state,
+        coupleExamples,
+        femaleExamples,
+        maleExamples,
+      });
       message.success("Update success");
       onClose();
     } catch (err) {
@@ -862,6 +923,16 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
             value={state.malePrompt}
           />
         </Col>
+        <Col style={{ marginTop: "10px" }}>
+          <Typography.Text strong>Couple prompt</Typography.Text>
+          <Input
+            placeholder="Input male prompt text"
+            onChange={(e) =>
+              setState({ ...state, couplePrompt: e.target.value })
+            }
+            value={state.couplePrompt}
+          />
+        </Col>
         {/*  */}
         <Col style={{ marginTop: "10px" }}>
           <Typography.Text strong>Negative prompt</Typography.Text>
@@ -883,6 +954,18 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
             value={state.maleNegative}
           />
         </Col>
+        <Col style={{ marginTop: "10px" }}>
+          <Typography.Text strong>Couple negative prompt</Typography.Text>
+          <Input.TextArea
+            size={10}
+            placeholder="Input female prompt text"
+            onChange={(e) =>
+              setState({ ...state, coupleNegative: e.target.value })
+            }
+            value={state.coupleNegative}
+          />
+        </Col>
+
         {/*  */}
         <Row align={"middle"} style={{ marginTop: "10px" }}>
           <Col style={{ margin: "10px" }}>
@@ -1131,6 +1214,16 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
             </div>
           </Col>
           <Col style={{ margin: "10px" }}>
+            <Typography.Text strong>Same gender</Typography.Text>
+            <div>
+              <Switch
+                onChange={(e) => setState({ ...state, faceSwapSameGender: e })}
+                checked={state.faceSwapSameGender}
+              />
+            </div>
+          </Col>
+
+          <Col style={{ margin: "10px" }}>
             <Typography.Text strong>Upscaler</Typography.Text>
             <div>
               <Select
@@ -1154,7 +1247,7 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
                 onChange={(e) => setState({ ...state, restoreFace: e })}
                 value={state?.restoreFace}
               >
-                {options.faceRestorers.map((item) => (
+                {[{ name: "None" }, ...options.faceRestorers].map((item) => (
                   <Select.Option value={item.name}>{item.name}</Select.Option>
                 ))}
               </Select>
@@ -1165,11 +1258,11 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
             <div>
               <Input
                 style={{ maxWidth: 120 }}
-                value={state.upscaledBy}
+                value={state.faceSwapUpscaledBy}
                 type={"number"}
                 min={0}
                 onChange={(e) =>
-                  setState({ ...state, upscaledBy: e.target.value })
+                  setState({ ...state, faceSwapUpscaledBy: e.target.value })
                 }
               />
             </div>
@@ -1179,28 +1272,21 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Female images</Typography.Text>
           <Row align={"middle"}>
-            {state.femaleExamples?.map((item) => (
+            {femaleExamples.map((item) => (
               <ImageDeleteable
                 src={item}
                 key={item}
                 onDelete={(e) => {
-                  setState({
-                    ...state,
-                    femaleExamples: [
-                      ...state.femaleExamples.filter((i) => i != e),
-                    ],
-                  });
+                  setFemaleExamples((prev) => prev.filter((i) => i != e));
                 }}
               />
             ))}
-            {state.femaleExamples?.length < 6 && (
+            {femaleExamples.length < 6 && (
               <UploadMultiple
                 onChange={(e) => {
-                  setState({
-                    ...state,
-                    femaleExamples: [...state.femaleExamples, ...e],
-                  });
+                  setFemaleExamples((prev) => [...prev, ...e]);
                 }}
+                index={`female-edit-${data._id}`}
               />
             )}
           </Row>
@@ -1209,26 +1295,43 @@ const EditModal = ({ open, onClose, data, afterEdit, options }) => {
         <Col style={{ margin: "10px" }}>
           <Typography.Text strong>Male images</Typography.Text>
           <Row align={"middle"}>
-            {state.maleExamples?.map((item) => (
+            {maleExamples.map((item) => (
               <ImageDeleteable
                 src={item}
                 key={item}
                 onDelete={(e) => {
-                  setState({
-                    ...state,
-                    maleExamples: [...state.maleExamples.filter((i) => i != e)],
-                  });
+                  setMaleExamples((prev) => prev.filter((i) => i != e));
                 }}
               />
             ))}
-            {state.maleExamples?.length < 6 && (
+            {maleExamples.length < 6 && (
               <UploadMultiple
-                index={"male"}
                 onChange={(e) => {
-                  setState({
-                    ...state,
-                    maleExamples: [...state.maleExamples, ...e],
-                  });
+                  setMaleExamples((prev) => [...prev, ...e]);
+                }}
+                index={`male-edit-${data._id}`}
+              />
+            )}
+          </Row>
+        </Col>
+
+        <Col style={{ margin: "10px" }}>
+          <Typography.Text strong>Couple images</Typography.Text>
+          <Row align={"middle"}>
+            {coupleExamples.map((item) => (
+              <ImageDeleteable
+                src={item}
+                key={item}
+                onDelete={(e) => {
+                  setCoupleExamples((prev) => prev.filter((i) => i != e));
+                }}
+              />
+            ))}
+            {coupleExamples.length < 6 && (
+              <UploadMultiple
+                index={`couple-edit-${data._id}`}
+                onChange={(e) => {
+                  setCoupleExamples((prev) => [...prev, ...e]);
                 }}
               />
             )}
