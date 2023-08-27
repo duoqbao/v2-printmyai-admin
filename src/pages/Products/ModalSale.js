@@ -43,9 +43,9 @@ export default function ModalSale(props) {
   };
   return (
     <Modal
+      destroyOnClose
       visible={isOpen}
       onCancel={() => {
-        setItem({});
         setOpen(false);
       }}
       onOk={submitSale}

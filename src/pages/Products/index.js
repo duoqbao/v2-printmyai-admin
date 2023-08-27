@@ -39,7 +39,7 @@ function removeEmptyFields(obj) {
   }
   return obj;
 }
-export default function Products() {
+export default function Products({ handleForceReload, types }) {
   const params = useParams();
   const [product, setProduct] = useState([]);
   const [listBluePrint, setListBulePrint] = useState([]);
@@ -47,7 +47,6 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isInput, setIsInput] = useState(false);
-  const [types, setTypes] = useState([]);
   const { id } = params;
   const [productAdd, setProductAdd] = useState({});
   const [inputSearch, setInputSearch] = useState("");
@@ -62,30 +61,10 @@ export default function Products() {
     setListBulePrint(res_1);
     setListModal(res_1);
   };
-  const getData = async () => {
-    setLoading(true);
-    try {
-      const res = await Product.getList(id);
-      setProduct(res);
-      if (res) {
-        const uniqueArr = res.filter((obj, index, self) => {
-          const types = self.map((obj) => obj.type);
-          return types.indexOf(obj.type) === index;
-        });
-        const temp = uniqueArr?.map((item) => {
-          return {
-            value: item.type,
-          };
-        });
-        setTypes(temp);
-      }
-      setLoading(false);
-    } catch (error) {}
-  };
+
   useEffect(() => {
     document.title = "Products";
     getAllBlueprints();
-    getData();
   }, [id]);
   const columns = [
     {
@@ -182,7 +161,6 @@ export default function Products() {
       message.error("Input price is required");
       return;
     }
-    console.log(productAdd);
     const product = removeEmptyFields(productAdd);
     try {
       if (productAdd._id) {
@@ -190,10 +168,10 @@ export default function Products() {
         message.success("Updated product");
       } else {
         const res = await Product.creted(id, product);
+        handleForceReload();
         message.success("Created product");
       }
       onCloseAddProduct();
-      getData();
     } catch (error) {
       message.error("Error creating product");
     }
@@ -257,204 +235,16 @@ export default function Products() {
       <Spin spinning={loading}>
         <Row gutter={[24, 24]}>
           <Col xs="24" span={24}>
-            <Card
-              bordered={false}
-              className="criclebox tablespace mb-24"
-              title="Product by Category"
-            >
-              <div
-                style={{ display: "flex", justifyContent: "end", padding: 16 }}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                onClick={() => {
+                  setIsVisible(true);
+                }}
+                type="primary"
               >
-                <Button
-                  onClick={() => {
-                    setIsVisible(true);
-                  }}
-                  type="primary"
-                >
-                  Add product
-                </Button>
-              </div>
-              <Row
-                className="rowgap-vbox"
-                gutter={[24, 0]}
-                style={{ padding: 24 }}
-              >
-                {product.length > 0 ? (
-                  product?.map((c, index) => (
-                    <Col
-                      key={index}
-                      xs={24}
-                      sm={24}
-                      md={12}
-                      lg={6}
-                      xl={6}
-                      className="mb-24"
-                    >
-                      <Card bordered={false} className="criclebox ">
-                        <div className="card">
-                          {/* <Carousel
-                            style={{ width: "80%" }}
-                            images={c.images}
-                          /> */}
-                          <Image
-                            style={{ width: "230px", height: "150px" }}
-                            src={c.image}
-                          />
-                          <h1>{c.title}</h1>
-                          {c?.onSale && (
-                            <>
-                              <p className="price sale">{`-${
-                                formattedNumber(c.salePrice || 0) || 0
-                              }%`}</p>
-                              <Tooltip
-                                placement="left"
-                                title={
-                                  <div
-                                    style={{
-                                      minHeight: 300,
-                                      minWidth: 200,
-                                      background: "#fff",
-                                    }}
-                                  >
-                                    {c.sizes.map((s) => (
-                                      <div
-                                        style={{
-                                          padding: 10,
-                                        }}
-                                      >
-                                        <div
-                                          style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            padding: "10px 0px",
-                                          }}
-                                        >
-                                          <Typography
-                                            style={{
-                                              color: "#333",
-                                              fontWeight: "bold",
-                                            }}
-                                          >
-                                            {s.title} :
-                                          </Typography>
-                                          <Typography
-                                            style={{
-                                              color: "#bd4040",
-                                              fontWeight: "bold",
-                                            }}
-                                          >
-                                            {parseFloat(
-                                              s?.price
-                                                ? s?.price -
-                                                    s?.price *
-                                                      (c?.salePrice / 100)
-                                                : c.price -
-                                                    c?.price *
-                                                      (c?.salePrice / 100)
-                                            ).toFixed(2)}{" "}
-                                            $
-                                          </Typography>
-                                        </div>
-                                        <div
-                                          style={{
-                                            display: "flex",
-                                            justifyContent: "flex-end",
-                                          }}
-                                        >
-                                          <Typography
-                                            style={{
-                                              fontWeight: "bold",
-                                              textDecoration: "line-through",
-                                            }}
-                                          >
-                                            {s?.price ? s?.price : c.price} $
-                                          </Typography>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                }
-                              >
-                                <InfoCircleFilled
-                                  style={{ color: "#0a5266" }}
-                                />
-                              </Tooltip>
-                            </>
-                          )}
-                          <p class="price">{`$ ${formattedNumber(
-                            c.price || 0
-                          )}`}</p>
-
-                          <p>{c.type}</p>
-                          <div>
-                            {!c.onSale ? (
-                              <Button
-                                type="success"
-                                onClick={() => handleOnSales(c)}
-                              >
-                                On Sales
-                              </Button>
-                            ) : (
-                              <Button
-                                ghost
-                                danger
-                                onClick={() => handleOnSales(c)}
-                              >
-                                Off Sales
-                              </Button>
-                            )}
-                          </div>
-
-                          <div className="button-flex">
-                            <Button
-                              onClick={() => {
-                                getPrintProvider(c.id);
-                                const tempProduct = { ...c };
-                                tempProduct.providerOther =
-                                  tempProduct?.providerOther?.information?.id;
-                                tempProduct.providerUS =
-                                  tempProduct?.providerUS?.information?.id;
-                                setProductAdd(tempProduct || {});
-                                setIsInput(true);
-                              }}
-                              type="warning"
-                            >
-                              Edit
-                            </Button>
-                            <Popconfirm
-                              title="Are you sure ? "
-                              onConfirm={async () => {
-                                try {
-                                  const res = await Product.delete(c._id);
-                                  message.success("Delete Success");
-                                  getData();
-                                } catch (error) {
-                                  message.error("Delete Failed");
-                                }
-                              }}
-                              onCancel={() => {}}
-                            >
-                              <Button type="danger">Delete</Button>
-                            </Popconfirm>
-                          </div>
-                        </div>
-                      </Card>
-                    </Col>
-                  ))
-                ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Empty />
-                  </div>
-                )}
-              </Row>
-            </Card>
+                Add product
+              </Button>
+            </div>
           </Col>
         </Row>
         <Modal
@@ -462,7 +252,9 @@ export default function Products() {
           title="Add Product"
           width={900}
           footer={null}
-          onCancel={onCloseAddProduct}
+          destroyOnClose
+          onCancel={() => setIsVisible(false)}
+          closable
           zIndex={99}
         >
           <div>
@@ -590,6 +382,7 @@ export default function Products() {
                   )}
                 </Col>
                 <SizeImage
+                  id={productAdd?._id || new Date().getTime()}
                   onChange={(e) =>
                     setProductAdd({ ...productAdd, sizeImage: e })
                   }
@@ -670,7 +463,7 @@ export default function Products() {
   );
 }
 
-const SizeImage = ({ onChange }) => {
+const SizeImage = ({ onChange, id }) => {
   const [loading, setLoading] = useState(false);
 
   const handleUploadFiles = async (files) => {
@@ -693,7 +486,7 @@ const SizeImage = ({ onChange }) => {
   return (
     <div className="">
       <input
-        id={`fileUpload`}
+        id={`fileUpload-${id}`}
         type="file"
         accept="image/*"
         onChange={handleFileEvent}
@@ -702,7 +495,7 @@ const SizeImage = ({ onChange }) => {
       {loading ? (
         <Spin spinning indicator={<LoadingOutlined />} />
       ) : (
-        <label htmlFor={`fileUpload`}>
+        <label htmlFor={`fileUpload-${id}`}>
           <a className={`btn btn-primary `}>Upload Files</a>
         </label>
       )}

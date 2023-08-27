@@ -2,6 +2,7 @@ import React from "react";
 import Loadable from "react-loadable";
 import Loading from "components/Loading";
 import Coupon from "pages/Coupon";
+import ProductV2 from "pages/ProductV2";
 
 const Styles = Loadable({
   loader: () => import("../pages/CategoryStyle/index"),
@@ -84,7 +85,7 @@ export default [
   },
   {
     path: "/category/:id/products",
-    component: Products,
+    component: ProductV2,
   },
   {
     path: "/settings",

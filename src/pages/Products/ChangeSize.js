@@ -70,10 +70,8 @@ export default function ChangeSize(props) {
         };
       });
       setData(temp);
-      // setDataVariants(temp);
     } else {
       setData(groupedBySize);
-      // setDataVariants(groupedBySize);
     }
   };
 
@@ -95,14 +93,11 @@ export default function ChangeSize(props) {
     setOpen(newOpen);
   };
 
-  useEffect(() => {}, [variants]);
-
   useEffect(() => {
     getData();
     setHexColor(variants.hexColor);
   }, [idProvider]);
 
-  console.log(data);
   return (
     <Spin spinning={loading}>
       <div className="product">

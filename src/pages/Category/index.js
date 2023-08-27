@@ -90,24 +90,26 @@ export default function Category() {
     getData();
   }, []);
   const deleteCategory = async (id) => {
-    try {
-      const res = await Categories.delete(id);
-      message.success("Delete Success");
-      getData();
-    } catch (error) {
-      const temp = error?.response?.data?.stack.split("\n");
-      Modal.confirm({
-        title: "Are you sure you want to delete ?",
-        content: temp[0],
-        onOk: async () => {
-          const res = await Categories.deleteForce(id);
-          message.success("Delete Success");
-          getData();
-        },
-        onCancel: async () => {},
-      });
-      //  message.error("Delete Error");
-    }
+    const res = await Categories.deleteForce(id);
+    message.success("Delete Success");
+    getData();
+    // try {
+    //   const res = await Categories.delete(id);
+    //   message.success("Delete Success");
+    //   getData();
+    // } catch (error) {
+    //   const temp = error?.response?.data?.stack.split("\n");
+    //   Modal.confirm({
+    //     title: "Are you sure you want to delete ?",
+    //     content: temp[0],
+    //     onOk: async () => {
+    //       const res = await Categories.deleteForce(id);
+    //       message.success("Delete Success");
+    //       getData();
+    //     },
+    //     onCancel: async () => {},
+    //   });
+    // }
   };
   const createName = async () => {
     try {

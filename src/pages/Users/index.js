@@ -18,7 +18,7 @@ export default function Users() {
   });
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const getData = async () => {
+  const getData = async (filters) => {
     try {
       setLoading(true);
       const { users, total } = await ApiUsers.getUsers(filters);
@@ -115,12 +115,12 @@ export default function Users() {
     },
   ];
   useEffect(() => {
-    getData();
+    getData(filters);
   }, [dispatch]);
 
   const handlePaginationChange = (page, pageSize) => {
     setFilters({ ...filters, current: page, skip: page - 1, limit: pageSize });
-    getData();
+    getData({ ...filters, current: page, skip: page - 1, limit: pageSize });
   };
   return (
     <div className="layout-content">

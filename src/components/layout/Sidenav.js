@@ -159,8 +159,6 @@ function Sidenav({ color }) {
       </>
     );
   };
-  console.log(page);
-  useEffect(() => {}, [page]);
   return (
     <>
       <div className="brand">
@@ -209,61 +207,59 @@ function Sidenav({ color }) {
           </NavLink>
         </Menu.Item>
         <Divider />
-        <Menu.SubMenu title="Shop" key="shop">
-          <Menu.Item key="category">
-            <NavLink to="/category">
-              <span
-                className="icon"
-                style={{
-                  background: page === "tables" ? color : "",
-                }}
-              >
-                {tables}
-              </span>
-              <span className="label">Catalog</span>
-            </NavLink>
-          </Menu.Item>
-          <Menu.Item key="sales">
-            <NavLink to="/sales">
-              <span
-                className="icon"
-                style={{
-                  background: page === "tables" ? color : "",
-                }}
-              >
-                {tables}
-              </span>
-              <span className="label">Sales</span>
-            </NavLink>
-          </Menu.Item>
-          <Menu.Item key="4">
-            <NavLink to="/events">
-              <span
-                className="icon"
-                style={{
-                  background: page === "tables" ? color : "",
-                }}
-              >
-                {tables}
-              </span>
-              <span className="label">Events</span>
-            </NavLink>
-          </Menu.Item>
+        <Menu.Item key="category">
+          <NavLink to="/category">
+            <span
+              className="icon"
+              style={{
+                background: page === "tables" ? color : "",
+              }}
+            >
+              {tables}
+            </span>
+            <span className="label">Catalog</span>
+          </NavLink>
+        </Menu.Item>
+        <Menu.Item key="sales">
+          <NavLink to="/sales">
+            <span
+              className="icon"
+              style={{
+                background: page === "tables" ? color : "",
+              }}
+            >
+              {tables}
+            </span>
+            <span className="label">Sales</span>
+          </NavLink>
+        </Menu.Item>
+        <Menu.Item key="4">
+          <NavLink to="/events">
+            <span
+              className="icon"
+              style={{
+                background: page === "tables" ? color : "",
+              }}
+            >
+              {tables}
+            </span>
+            <span className="label">Events</span>
+          </NavLink>
+        </Menu.Item>
 
-          <Menu.Item key="setting">
-            <NavLink to="/coupon">
-              <span
-                className="icon"
-                style={{
-                  background: page === "dashboard" ? color : "",
-                }}
-              >
-                {setting}
-              </span>
-              <span className="label">Coupon</span>
-            </NavLink>
-          </Menu.Item>
-        </Menu.SubMenu>
+        <Menu.Item key="setting">
+          <NavLink to="/coupon">
+            <span
+              className="icon"
+              style={{
+                background: page === "dashboard" ? color : "",
+              }}
+            >
+              {setting}
+            </span>
+            <span className="label">Coupon</span>
+          </NavLink>
+        </Menu.Item>
         <Divider />
         <Menu.Item key="setting">
           <NavLink to="/settings">
