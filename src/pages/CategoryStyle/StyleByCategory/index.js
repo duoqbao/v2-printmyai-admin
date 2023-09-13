@@ -28,6 +28,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Api from "../../../api/styles";
 import { uploadImage } from "../../../api/upload";
+import Arrange from "./Arrange";
 
 export default function StyleByCategory() {
   const { categoryId } = useParams();
@@ -74,6 +75,8 @@ export default function StyleByCategory() {
           {" "}
           {category.name}
         </Typography.Title>
+        <Arrange setRefetch={setRefetch} />
+
         <Row align={"middle"}>
           <Typography.Text style={{ padding: "0px 10px" }}>
             Current
@@ -120,7 +123,6 @@ export default function StyleByCategory() {
     </div>
   );
 }
-
 const AddModal = ({ open, onClose, options }) => {
   const { categoryId } = useParams();
   const [coupleExamples, setCoupleExamples] = useState([]);

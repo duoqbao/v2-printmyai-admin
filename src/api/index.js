@@ -1,7 +1,7 @@
 import axios from "axios";
 import queryString from "query-string";
-export const API_URL = "https://api.printmyai.io/api";
-// export const API_URL = "http://localhost:4040/api";
+// export const API_URL = "https://api.printmyai.io/api";
+export const API_URL = "http://localhost:4040/api";
 
 const client = axios.create({
   baseURL: `${API_URL}`,
@@ -16,7 +16,6 @@ const client = axios.create({
 
 client.interceptors.request.use(async (config) => {
   const customHeaders = {};
-  // const accessToken = localStorage.getItem("Bearer");
   const accessToken = localStorage.getItem("Bearer");
   if (accessToken) {
     customHeaders.Authorization = `Bearer ${accessToken}`;

@@ -31,4 +31,7 @@ export default {
   getOptions: () => {
     return api.get(`/styles/config-options`);
   },
+  sortList: (list) => {
+    return api.post(`/styles/sort-list`, { list });
+  },
 };
