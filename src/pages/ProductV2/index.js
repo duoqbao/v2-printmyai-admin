@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Api from "../../api";
 import Products from "pages/Products";
 import { Spin } from "antd";
+import Arrange from "./Arrange";
 export default function ProductV2() {
   const { id } = useParams();
   const [data, setData] = useState([]);
@@ -41,7 +42,7 @@ export default function ProductV2() {
             handleForceReload={() => setForceReload((prev) => !prev)}
             types={types}
           />
-
+          <Arrange setRefetch={setForceReload} />
           <div
             style={{
               display: "flex",
