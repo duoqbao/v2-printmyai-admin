@@ -228,6 +228,7 @@ const App = ({}) => {
                   rowKey="key"
                   columns={columns}
                   dataSource={dataSource}
+                  pagination={{ pageSize: 1000 }}
                 />
               </SortableContext>
             </DndContext>

@@ -123,7 +123,6 @@ const App = ({ setRefetch }) => {
       >
         <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
           <SortableContext
-            // rowKey array
             items={dataSource.map((i) => i.key)}
             strategy={verticalListSortingStrategy}
           >
@@ -136,7 +135,7 @@ const App = ({ setRefetch }) => {
               rowKey="key"
               columns={columns}
               dataSource={dataSource}
-              pagination={{ position: ["none", "none"] }}
+              pagination={{ position: ["none", "none"], pageSize: 1000 }}
             />
           </SortableContext>
         </DndContext>

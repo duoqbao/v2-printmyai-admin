@@ -161,12 +161,12 @@ const AddModal = ({ open, onClose, options }) => {
   });
   const [loading, setLoading] = useState(false);
   const onOk = async () => {
-    if (!state.femalePrompt && !state.malePrompt && !state.couplePrompt) {
-      message.error(
-        "Include at least one prompt. Female or Male or Couple one"
-      );
-      return;
-    }
+    // if (!state.femalePrompt && !state.malePrompt && !state.couplePrompt) {
+    //   message.error(
+    //     "Include at least one prompt. Female or Male or Couple one"
+    //   );
+    //   return;
+    // }
     try {
       setLoading(true);
       const data = await Api.createStyleByCategoryId(categoryId, {
