@@ -34,4 +34,7 @@ export default {
   sortList: (list) => {
     return api.post(`/styles/sort-list`, { list });
   },
+  statistic: (type) => {
+    return api.get(`/generated-styles/statistic?type=${type}`);
+  },
 };

@@ -274,6 +274,20 @@ function Sidenav({ color }) {
             <span className="label">Setting</span>
           </NavLink>
         </Menu.Item>
+
+        <Menu.Item key="statistic">
+          <NavLink to="/statistic">
+            <span
+              className="icon"
+              style={{
+                background: page === "dashboard" ? color : "",
+              }}
+            >
+              {event}
+            </span>
+            <span className="label">Statistic</span>
+          </NavLink>
+        </Menu.Item>
       </Menu>
     </>
   );

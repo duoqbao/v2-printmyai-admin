@@ -3,6 +3,7 @@ import Loadable from "react-loadable";
 import Loading from "components/Loading";
 import Coupon from "pages/Coupon";
 import ProductV2 from "pages/ProductV2";
+import Statistic from "pages/Statistic";
 
 const Styles = Loadable({
   loader: () => import("../pages/CategoryStyle/index"),
@@ -118,6 +119,10 @@ export default [
   {
     path: "/coupon",
     component: Coupon,
+  },
+  {
+    path: "/statistic",
+    component: Statistic,
   },
   {
     path: "*",
