@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { Card, Table, Tag } from "antd";
+import {
+  Button,
+  Card,
+  Row,
+  Table,
+  Tag,
+  Modal,
+  Input,
+  Typography,
+  message,
+} from "antd";
 import { useSelector } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
 import ApiUsers from "api/users";
+import { InputNumber } from "antd";
+
 const formattedNumber = (number) => {
   return number ? number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
 };
@@ -30,7 +42,7 @@ export default function Payments() {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (item) => {
-        return <span>{moment(item).format("DD-MM-YYYY HH:mm")}</span>;
+        return <span>{moment(item).format("hh:mm A, DD-MM-YYYY ")}</span>;
       },
     },
     {
@@ -38,7 +50,7 @@ export default function Payments() {
       dataIndex: "amount",
       key: "amount",
       render: (item) => {
-        return <span>{`$ ${formattedNumber(item / 100 || 0) || 0}`}</span>;
+        return <span>{`$ ${formattedNumber(item || 0) || 0}`}</span>;
       },
     },
     {
@@ -64,6 +76,22 @@ export default function Payments() {
     }
     getData();
   }, [id]);
+
+  const [modal2Open, setModal2Open] = useState(false);
+  const [value, setValue] = useState(0);
+  const [refundLoading, setRefundLoading] = useState(false);
+  const handleRefund = async () => {
+    try {
+      setRefundLoading(true);
+      await ApiUsers.refund(id, value);
+      message.success("added");
+      setModal2Open(false);
+    } catch (err) {
+      message.error(err);
+    } finally {
+      setRefundLoading(false);
+    }
+  };
   return (
     <div className="layout-styles order">
       <Card
@@ -71,12 +99,32 @@ export default function Payments() {
         className="criclebox tablespace mb-24"
         title={`Payment by ${user?.username}`}
       >
-        <Table
-          loading={loading}
-          columns={columns}
-          dataSource={data}
-          
-        />
+        <Row justify={"end"}>
+          <Button
+            type="primary"
+            style={{ margin: 5 }}
+            onClick={() => setModal2Open(true)}
+          >
+            Add Credit
+          </Button>
+          <Modal
+            centered
+            open={modal2Open}
+            onOk={handleRefund}
+            confirmLoading={refundLoading}
+            onCancel={() => setModal2Open(false)}
+          >
+            <Typography.Text>Add credit manual</Typography.Text>
+            <br />
+            <InputNumber
+              onChange={(e) => setValue(e)}
+              placeholder="amount"
+              style={{ borderRadius: 5 }}
+              min={1}
+            />
+          </Modal>
+        </Row>
+        <Table loading={loading} columns={columns} dataSource={data} />
       </Card>
     </div>
   );

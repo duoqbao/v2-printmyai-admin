@@ -17,5 +17,8 @@ export default {
   },
   deleteUser: (id) => {
     return api.delete(`/users/${id}`);
-  }
+  },
+  refund: (id, quantity) => {
+    return api.post(`users/${id}/refund-credit`, { quantity });
+  },
 };

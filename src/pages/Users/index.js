@@ -35,11 +35,6 @@ export default function Users() {
   };
   const columns = [
     {
-      title: "User Name",
-      dataIndex: "username",
-      key: "username",
-    },
-    {
       title: "Email Address",
       dataIndex: "email",
       key: "email",
@@ -49,22 +44,16 @@ export default function Users() {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (item) => {
-        return <span>{moment(item).format("DD-MM-YYYY")}</span>;
+        return <span>{moment(item).format("hh:mm A, DD-MM-YYYY")}</span>;
       },
     },
+
     {
-      title: "Fine Tunes",
-      dataIndex: "tunes",
-      key: "tunes",
+      title: "Balance",
+      dataIndex: "credit",
+      key: "credit",
       render: (item) => {
-        const count = item.reduce((acc, item) => {
-          if (Object.keys(item).length === 1) {
-            return acc;
-          } else {
-            return acc + 1;
-          }
-        }, 0);
-        return <div>{count}</div>;
+        return parseInt(item) > 0 ? item : 0;
       },
     },
     {
@@ -78,7 +67,7 @@ export default function Users() {
                 history.push(`/users/orders`);
               }}
             >
-              Show Order
+              Orders
             </a>
             <a
               onClick={() => {
@@ -86,7 +75,7 @@ export default function Users() {
                 history.push(`/users/${record._id}/payments`);
               }}
             >
-              Show Payments
+              Payments
             </a>
           </div>
         );
@@ -122,6 +111,7 @@ export default function Users() {
     setFilters({ ...filters, current: page, skip: page - 1, limit: pageSize });
     getData({ ...filters, current: page, skip: page - 1, limit: pageSize });
   };
+
   return (
     <div className="layout-content">
       <Card
